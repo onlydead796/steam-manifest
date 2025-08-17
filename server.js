@@ -1,14 +1,25 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // bunu ekle
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(cors());
 
+// Supabase client
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// public klasörünü statik yap
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Ana sayfa route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// API endpoint
 app.get('/get-signed-url/:gameId', async (req, res) => {
   const { gameId } = req.params;
   try {
