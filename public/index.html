@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steam Manifest Downloader</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{font-family:'Roboto',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;min-height:100vh}
+.orbitron{font-family:'Orbitron',sans-serif}
+.glow-text{text-shadow:0 0 8px rgba(59,130,246,0.7)}
+.glow-box{box-shadow:0 0 15px rgba(59,130,246,0.5)}
+.input-glow:focus{box-shadow:0 0 0 3px rgba(59,130,246,0.5)}
+.pulse-animation{animation:pulse 2s infinite}
+.terminal-text{font-family:'Courier New',monospace;background-color:rgba(30,41,59,.7);border-left:3px solid #3b82f6;padding:1rem;border-radius:.5rem;overflow-x:auto;}
+</style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+<div class="max-w-2xl w-full mx-auto">
+<header class="text-center mb-10">
+<h1 class="orbitron text-4xl font-bold mb-2 glow-text">STEAM MANIFEST HUB</h1>
+<p class="text-slate-300 text-lg">Check and download game manifests by Steam AppID</p>
+</header>
+
+<main class="glow-box bg-slate-800/50 backdrop-blur-sm rounded-xl p-6">
+<div class="flex gap-4 mb-6">
+<input type="text" id="gameId" placeholder="Enter Steam AppID" class="input-glow pl-4 w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+<button id="checkBtn" class="pulse-animation orbitron bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg">CHECK MANIFEST</button>
+</div>
+
+<div id="resultsSection" class="hidden">
+<div class="terminal-text mb-4" id="terminalOutput"></div>
+<div id="downloadSection" class="hidden text-center">
+<a id="downloadLink" download class="inline-block orbitron bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 px-6 rounded-lg" target="_blank">
+<i class="fas fa-download mr-2"></i> DOWNLOAD MANIFEST
+</a>
+</div>
+<div id="notFoundSection" class="hidden text-center text-red-400">
+<p>Manifest not found for this AppID.</p>
+</div>
+</div>
+</main>
+</div>
+
+<script>
+const BACKEND_URL = "https://steam-manifest-backend.onrender.com";
+
+document.addEventListener('DOMContentLoaded',function(){
+const checkBtn = document.getElementById('checkBtn');
+const gameIdInput = document.getElementById('gameId');
+const resultsSection = document.getElementById('resultsSection');
+const terminalOutput = document.getElementById('terminalOutput');
+const downloadSection = document.getElementById('downloadSection');
+const downloadLink = document.getElementById('downloadLink');
+const notFoundSection = document.getElementById('notFoundSection');
+
+checkBtn.addEventListener('click', checkManifest);
+gameIdInput.addEventListener('keypress', function(e){if(e.key==='Enter') checkManifest();});
+
+async function checkManifest(){
+const gameId = gameIdInput.value.trim();
+if(!gameId||!/^\d+$/.test(gameId)) return showError('Please enter a valid Steam AppID');
+
+checkBtn.disabled=true;
+checkBtn.textContent='Checking...';
+resultsSection.classList.remove('hidden');
+downloadSection.classList.add('hidden');
+notFoundSection.classList.add('hidden');
+terminalOutput.textContent = `> Initiating manifest check for Steam AppID: ${gameId}\n`;
+
+try{
+const res = await fetch(`${BACKEND_URL}/get-signed-url/${gameId}`);
+if(!res.ok) throw new Error('Failed to fetch signed URL');
+const json = await res.json();
+
+if(json.signedUrl){
+terminalOutput.textContent += '> Manifest found! Ready for download.\n';
+downloadLink.href = json.signedUrl;
+downloadSection.classList.remove('hidden');
+downloadLink.click();
+}else{
+terminalOutput.textContent += '> Manifest not found!\n';
+notFoundSection.classList.remove('hidden');
+}
+}catch(err){
+showError('Unexpected error occurred');
+console.error(err);
+}finally{
+checkBtn.textContent='CHECK MANIFEST';
+checkBtn.disabled=false;
+}
+}
+
+function showError(msg){
+terminalOutput.textContent=`> ERROR: ${msg}\n`;
+resultsSection.classList.remove('hidden');
+downloadSection.classList.add('hidden');
+notFoundSection.classList.add('hidden');
+}
+});
+</script>
+</body>
+</html>
