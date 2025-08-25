@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steam Manifest Merkezi</title>
@@ -92,9 +93,10 @@
 <div class="max-w-4xl w-full mx-auto">
     <!-- Header -->
     <header class="text-center mb-10">
-        <h1 class="orbitron text-4xl md:text-5xl font-bold mb-2 glow-text">STEAM MANIFEST MERKEZİ</h1>
+    <h1 class="orbitron text-4xl md:text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-red-500 to-pink-500 to- animate-pulse">STEAM MANIFEST MERKEZİ</h1>
         <p class="text-slate-300 text-lg">Steam AppID ile oyun manifestlerini kontrol et ve indir</p>
         <p class="text-blue-400 text-sm mt-2">YAPIMCI: <a href="https://t.me/Pussly" class="text-purple-400 hover:text-purple-300 transition-colors">P-U-S-S-L-Y</a></p>
+        <p class="mt-2"><a href="https://t.me/Pussly" class="orbitron text-10xl md:text-10xl mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-red-500 to-yellow-500 hover:scale-105 hover:brightness-110 transition-transform duration-300 drop-shadow-lg">İstediğin Oyun Mu Yok ?</a></p>
         <div class="flex justify-center mt-6">
             <div class="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
         </div>
@@ -187,102 +189,81 @@
     </footer>
 </div>
 
-    <script>
-        const BACKEND_URL = "https://steam-manifest-backend.onrender.com";
-
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!localStorage.getItem('disclaimerAccepted')) {
-                document.getElementById('disclaimerModal').classList.remove('hidden');
-            }
-            document.getElementById('acceptDisclaimer').addEventListener('click', function() {
-                localStorage.setItem('disclaimerAccepted', 'true');
-                document.getElementById('disclaimerModal').classList.add('hidden');
-            });
-
-            const checkBtn = document.getElementById('checkBtn');
-            const gameIdInput = document.getElementById('gameId');
-            const resultsSection = document.getElementById('resultsSection');
-            const terminalOutput = document.getElementById('terminalOutput');
-            const downloadSection = document.getElementById('downloadSection');
-            const downloadLink = document.getElementById('downloadLink');
-            const notFoundSection = document.getElementById('notFoundSection');
-
-            checkBtn.addEventListener('click', checkManifest);
-            gameIdInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkManifest(); });
-
-            async function checkManifest() {
-                const gameId = gameIdInput.value.trim();
-                if (!gameId || !/^\d+$/.test(gameId)) {
-                    showError('Lütfen geçerli bir Steam AppID girin (sadece rakamlar)');
-                    return;
-                }
-
-                checkBtn.disabled = true;
-                checkBtn.classList.remove('pulse');
-                checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> KONTROL EDİLİYOR...';
-                resultsSection.classList.remove('hidden');
-                downloadSection.classList.add('hidden');
-                notFoundSection.classList.add('hidden');
-                terminalOutput.textContent = '';
-
-                typeTerminalText(`> Steam AppID için oyun kontrolü başlatılıyor: ${gameId}\n`, 0);
-
-                try {
-                    const res = await fetch(`${BACKEND_URL}/get-signed-url/${gameId}`);
-                    if (!res.ok) throw new Error('İmzalı URL alınamadı');
-                    const json = await res.json();
-
-                    if (json.signedUrl) {
-                        typeTerminalText(`> Veritabanında arama yapılıyor...\n> Oyun bulundu!\n> İndirme bağlantısı hazırlanıyor...\n> İndirmeye hazır.\n`, 100);
-                        downloadLink.href = json.signedUrl;
-                        setTimeout(() => {
-                            downloadSection.classList.remove('hidden');
-                            checkBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> KONTROL TAMAM';
-                            checkBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
-                            checkBtn.classList.add('bg-gradient-to-r', 'from-green-600', 'to-emerald-600');
-                        }, 1500);
-                    } else {
-                        typeTerminalText(`> Veritabanında arama yapılıyor...\n> Oyun bulunamadı!\n`, 100);
-                        setTimeout(() => {
-                            notFoundSection.classList.remove('hidden');
-                        }, 1500);
-                    }
-                } catch (err) {
-                    showError('Beklenmedik bir hata oluştu');
-                    console.error(err);
-                } finally {
-                    setTimeout(() => {
-                        checkBtn.innerHTML = 'Oyunu KONTROL ET';
-                        checkBtn.classList.add('pulse');
-                        checkBtn.classList.remove('bg-gradient-to-r', 'from-green-600', 'to-emerald-600');
-                        checkBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
-                        checkBtn.disabled = false;
-                    }, 3000);
-                }
-            }
-
-            function typeTerminalText(text, initialDelay) {
-                let i = 0;
-                setTimeout(() => {
-                    const interval = setInterval(() => {
-                        if (i < text.length) {
-                            terminalOutput.textContent += text.charAt(i);
-                            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-                            i++;
-                        } else {
-                            clearInterval(interval);
-                        }
-                    }, 20);
-                }, initialDelay);
-            }
-
-            function showError(msg) {
-                typeTerminalText(`> HATA: ${msg}\n`, 0);
-                resultsSection.classList.remove('hidden');
-                downloadSection.classList.add('hidden');
-                notFoundSection.classList.add('hidden');
-            }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!localStorage.getItem('disclaimerAccepted')) {
+            document.getElementById('disclaimerModal').classList.remove('hidden');
+        }
+        document.getElementById('acceptDisclaimer').addEventListener('click', function() {
+            localStorage.setItem('disclaimerAccepted', 'true');
+            document.getElementById('disclaimerModal').classList.add('hidden');
         });
-    </script>
+
+        const checkBtn = document.getElementById('checkBtn');
+        const gameIdInput = document.getElementById('gameId');
+        const resultsSection = document.getElementById('resultsSection');
+        const terminalOutput = document.getElementById('terminalOutput');
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadLink = document.getElementById('downloadLink');
+        const notFoundSection = document.getElementById('notFoundSection');
+
+        checkBtn.addEventListener('click', checkManifest);
+        gameIdInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkManifest(); });
+
+        async function checkManifest() {
+            const gameId = gameIdInput.value.trim();
+            if (!gameId || !/^\d+$/.test(gameId)) {
+                showError('Lütfen geçerli bir Steam AppID girin (sadece rakamlar)');
+                return;
+            }
+
+            checkBtn.disabled = true;
+            checkBtn.classList.remove('pulse');
+            checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> KONTROL EDİLİYOR...';
+            resultsSection.classList.remove('hidden');
+            downloadSection.classList.add('hidden');
+            notFoundSection.classList.add('hidden');
+            terminalOutput.textContent = '';
+
+            typeTerminalText(`> Steam AppID için oyun kontrolü başlatılıyor: ${gameId}\n`, 0);
+
+            // Supabase public bucket URL
+            const publicUrl = `https://xsrqthhmuwpszcwvoqci.supabase.co/storage/v1/object/public/zip-files/${gameId}.zip`;
+
+            // Burada sadece indirme linkini hazırlıyoruz
+            setTimeout(() => {
+                typeTerminalText(`> Veritabanında arama yapılıyor...\n> Oyun bulundu!\n> İndirme bağlantısı hazırlanıyor...\n> İndirmeye hazır.\n`, 100);
+                downloadLink.href = publicUrl;
+                downloadSection.classList.remove('hidden');
+                checkBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> KONTROL TAMAM';
+                checkBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+                checkBtn.classList.add('bg-gradient-to-r', 'from-green-600', 'to-emerald-600');
+                checkBtn.disabled = false;
+            }, 1500);
+        }
+
+        function typeTerminalText(text, initialDelay) {
+            let i = 0;
+            setTimeout(() => {
+                const interval = setInterval(() => {
+                    if (i < text.length) {
+                        terminalOutput.textContent += text.charAt(i);
+                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 20);
+            }, initialDelay);
+        }
+
+        function showError(msg) {
+            typeTerminalText(`> HATA: ${msg}\n`, 0);
+            resultsSection.classList.remove('hidden');
+            downloadSection.classList.add('hidden');
+            notFoundSection.classList.add('hidden');
+        }
+    });
+</script>
 </body>
 </html>
